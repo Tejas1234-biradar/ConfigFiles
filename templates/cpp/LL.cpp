@@ -1,3 +1,4 @@
+
 #include <bits/stdc++.h>
 #define MOD 1000000007
 #define int long long
@@ -33,15 +34,33 @@
   cout << "\n";
 
 using namespace std;
+
+// Singly Linked List Node
+struct ListNode {
+    int val;
+    ListNode *next;
+    ListNode() : val(0), next(nullptr) {}
+    ListNode(int x) : val(x), next(nullptr) {}
+    ListNode(int x, ListNode *n) : val(x), next(n) {}
+};
+
+// Doubly Linked List Node
+struct DListNode {
+    int val;
+    DListNode *prev;
+    DListNode *next;
+    DListNode() : val(0), prev(nullptr), next(nullptr) {}
+    DListNode(int x) : val(x), prev(nullptr), next(nullptr) {}
+    DListNode(int x, DListNode *p, DListNode *n) : val(x), prev(p), next(n) {}
+};
+
 void run() {
   // start here all the best
 }
+
 int32_t main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL);
-  int t;
-  cin>>t;
-  while(t--)
   run();
   return 0;
 }

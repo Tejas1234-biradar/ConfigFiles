@@ -1,6 +1,8 @@
 require("config.lazy")
 require("code_runner")
 require("template_chooser")
+require("contest_timer")
+require("contest_hud")
 
 -- Set true midnight black theme
 vim.opt.termguicolors = true
@@ -50,8 +52,6 @@ vim.api.nvim_create_autocmd("InsertLeave", {
   command = "set relativenumber",
 })
 
-
-
 -- C++ LSP setup
 local lspconfig = require("lspconfig")
 lspconfig.clangd.setup({
@@ -67,53 +67,65 @@ lspconfig.clangd.setup({
 })
 
 -- Setup Telescope
-local telescope_ok, telescope = pcall(require, 'telescope')
+local telescope_ok, telescope = pcall(require, "telescope")
 if telescope_ok then
   telescope.setup()
 else
   print("Telescope not found! Please install telescope.nvim")
   return
 end
--- Function to open input.txt and output.txt splits alongside current .cpp file
-local function open_cpp_with_io()
-  local ext = vim.fn.expand("%:e")
-  if ext ~= "cpp" then return end
-
-  -- Create input.txt and output.txt if missing
-  local input_file = "input.txt"
-  local output_file = "output.txt"
-  if vim.fn.filereadable(input_file) == 0 then
-    vim.fn.writefile({}, input_file)
-  end
-  if vim.fn.filereadable(output_file) == 0 then
-    vim.fn.writefile({}, output_file)
-  end
-
-  -- Save current window number (code window)
-  local code_win = vim.api.nvim_get_current_win()
-
-  -- Open vertical split on the right with input.txt
-  vim.cmd("vsplit " .. input_file)
-  local input_win = vim.api.nvim_get_current_win()
-
-  -- Go back to code window
-  vim.api.nvim_set_current_win(code_win)
-
-  -- Open horizontal split below with output.txt
-  vim.cmd("split " .. output_file)
-
-  -- Optional: set focus back to code window
-  vim.api.nvim_set_current_win(code_win)
-end
 
 -- Autocmd to trigger the splits and file creation on opening .cpp files
-vim.api.nvim_create_autocmd("BufReadPost", {
-  pattern = "*.cpp",
+
+vim.api.nvim_create_autocmd("CursorHoldI", {
+  pattern = "*",
   callback = function()
-    -- Use defer to allow buffer to load properly
-    vim.defer_fn(open_cpp_with_io, 100)
+    if vim.bo.modified then
+      vim.cmd("silent! write")
+    end
+  end,
+})
+vim.o.updatetime = 501 -- 1 second idle time
+-- Set commentstring for different filetypes
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "c", "cpp" },
+  callback = function()
+    vim.opt_local.commentstring = "// %s"
   end,
 })
 
 -- Optional keybinding to manually trigger split layout
-vim.keymap.set("n", "<leader>io", open_cpp_with_io, { desc = "Open input/output splits" })
+
+vim.keymap.set({ "n", "v" }, "<C-c>", '"+y', { noremap = true })
+
+local map = vim.keymap.set
+local opts = { noremap = true, silent = true }
+
+-- =====================
+-- VSCode-like mappings
+-- =====================
+
+-- Duplicate line up (Alt+Shift+Up)
+map("n", "<A-S-Up>", "yypk", opts)
+map("v", "<A-S-Up>", "y`>p`<k", opts)
+
+-- Duplicate line down (Alt+Shift+Down)
+map("n", "<A-S-Down>", "yyp", opts)
+map("v", "<A-S-Down>", "y`>p`<", opts)
+
+-- Ctrl+A = Select all
+map("n", "<C-a>", "ggVG", opts)
+
+-- Ctrl+C = Copy (in visual mode)
+map("v", "<C-c>", '"+y', opts)
+
+-- Ctrl+V = Paste
+map({ "n", "v" }, "<C-v>", '"+p', opts)
+
+-- Alt+Up = Move line up
+map("n", "<A-Up>", ":m .-2<CR>==", opts)
+map("v", "<A-Up>", ":m '<-2<CR>gv=gv", opts)
+
+-- Alt+Down = Move line down
+map("n", "<A-Down>", ":m .+1<CR>==", opts)
+map("v", "<A-Down>", ":m '>+1<CR>gv=gv", opts)

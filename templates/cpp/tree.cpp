@@ -1,3 +1,4 @@
+
 #include <bits/stdc++.h>
 #define MOD 1000000007
 #define int long long
@@ -33,15 +34,24 @@
   cout << "\n";
 
 using namespace std;
+
+// Binary Tree node structure
+struct TreeNode {
+    int val;
+    TreeNode *left;
+    TreeNode *right;
+    TreeNode() : val(0), left(nullptr), right(nullptr) {}
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+    TreeNode(int x, TreeNode *l, TreeNode *r) : val(x), left(l), right(r) {}
+};
+
 void run() {
   // start here all the best
 }
+
 int32_t main() {
   ios_base::sync_with_stdio(false);
   cin.tie(NULL);
-  int t;
-  cin>>t;
-  while(t--)
   run();
   return 0;
 }
